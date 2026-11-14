@@ -1,0 +1,69 @@
+I am continuing development of my Android live location-sharing app called SUMO. I have attached the complete current Android Studio project ZIP. Please inspect the actual source code and improve THIS project. Do not start over or give me generic instructions.
+
+IMPORTANT: First inspect every relevant file, explain the current architecture and identify bugs. Then implement the requirements below in the project files, test what can be tested, and return one complete updated ZIP. Do not claim a feature is tested unless you actually tested it. If you cannot run an Android Gradle build or test on physical devices, clearly say so and give me exact steps to test.
+
+CURRENT BACKEND:
+- Existing Render backend URL: https://claudeexample.onrender.com
+- The Android app must use this exact URL unless you discover a clear reason it is invalid.
+- The backend is deployed from my GitHub repository. Explain separately if backend files need to be committed/redeployed.
+- Keep the current backend/API compatible where possible. Do not silently change endpoints or database schema without updating both Android and backend code.
+- The project ZIP includes backend/ and app/ folders.
+
+SUMO APP EXPERIENCE:
+1. No login screen, no phone number, no OTP, no password, no family code, no family/group creation UI.
+2. A new user enters only their display name and taps “Let's Go!”.
+3. The app creates/uses an anonymous device identity internally. Store its identity/token securely using Android app preferences as appropriate.
+4. After the user explicitly opts in and grants location permission, their device appears on the shared Sumo map.
+5. All users who knowingly opt in to Sumo location sharing should be visible to other participating Sumo users. Clearly explain that this is a shared map and their location is visible to participants. Do not track anyone without consent.
+6. Provide a clear Stop Sharing / Start Sharing control. Stopping must stop GPS updates and stop publishing new coordinates. Do not silently restart sharing after the user has stopped it.
+7. Show a visible persistent Android notification while location sharing is active.
+
+MAP AND PEOPLE:
+1. Improve the map visual design and make it responsive and easy to read, similar to a polished live location-sharing demo.
+2. Show each person's marker as a circular badge containing their name initial(s), e.g. Hero = H and Vinod = V. Show their name clearly near/when selecting the marker.
+3. Show a people list with each participant's name and useful freshness/status indicator (e.g. updating / last updated / location unavailable). Do not falsely show stale coordinates as live.
+4. When I tap a person's name (e.g. Hero), centre/zoom the map on that person's latest location. Tapping Vinod should centre on Vinod.
+5. Provide a “show everyone / fit all” map control.
+6. Animate marker movement smoothly between actual location updates. Do not fake movement or generate random coordinates.
+7. Handle missing GPS, stale locations, permission denial, offline state, and API errors gracefully.
+8. Ensure map refresh and API polling do not cause unnecessary battery/data usage. Avoid creating duplicate polling timers or duplicate map markers.
+
+LOCATION ACCURACY AND UPDATE RATE:
+1. Request high-accuracy fused location updates.
+2. Target location interval: 5 seconds; fastest requested interval: 2 seconds; minimum distance: 0 metres, but explain Android may throttle actual updates.
+3. Filter clearly invalid/out-of-order location samples. Show the actual accuracy radius/status if useful.
+4. Send current/cached last known location immediately when appropriate, but do not label an old cached fix as current without showing its age.
+5. Keep map refresh reasonably frequent (around 2–3 seconds if efficient), but use efficient API calls and avoid unnecessary requests.
+6. Explain that GPS accuracy and update timing depend on device, satellite visibility, network, Android version, power-saving settings and manufacturer restrictions. Do not promise exact metre-level accuracy or exact intervals.
+
+BACKGROUND TRACKING (VERY IMPORTANT):
+Current issue: tracking works while Sumo is visible or in Recents, but stops when I swipe the app away/close it. Fix this properly.
+1. Inspect the existing LocationTrackingService and lifecycle handling.
+2. Use a correctly implemented Android location Foreground Service with foregroundServiceType="location", notification channel, persistent ongoing notification, and appropriate Android 13+ notification permission handling.
+3. Request background location permission only when genuinely required and explain Android's staged permission flow (foreground first, then background where applicable). Do not assume foreground permission automatically grants background permission.
+4. Ensure swiping the app away from Recents does not stop the foreground location service on supported Android devices.
+5. Handle service recreation/restart safely without duplicate callbacks, duplicate notifications, or duplicate uploads.
+6. Check START_STICKY behaviour, onTaskRemoved if relevant, service teardown, and boot receiver behaviour. Do not use aggressive or deceptive persistence techniques.
+7. On Android 12+ and Android 14+ respect foreground-service start restrictions and location permission rules. If starting from boot is restricted, explain the supported recovery path rather than claiming guaranteed restart.
+8. Do not claim tracking can continue after Force Stop, permission revocation, device shutdown, or all OEM battery restrictions. Explain these limitations accurately.
+9. Add clear user-facing guidance for battery optimisation settings only where needed. Do not attempt to bypass Android restrictions.
+10. Ensure Stop Sharing stops service and prevents automatic restart on boot.
+
+TESTING / DELIVERY:
+- Inspect Gradle dependencies, AndroidManifest, permissions, service, receiver, API client, Config.kt, backend app.py and map HTML/JS.
+- Confirm Config.kt uses https://claudeexample.onrender.com.
+- Keep the project openable in Android Studio and include required Gradle wrapper files if feasible.
+- Run Python syntax checks for backend and any backend tests you can add.
+- Run Android Gradle build if the environment supports it. If not, say explicitly that Android compilation was not verified.
+- Check ZIP integrity before delivery.
+- Return one complete ZIP, not scattered code snippets.
+- Include a concise CHANGELOG and exact beginner-friendly steps to open, sync, build APK, install on BOTH test phones, and test:
+  a) app visible,
+  b) app swiped away from Recents,
+  c) screen locked,
+  d) force-stop (expected limitation),
+  e) Stop Sharing,
+  f) two users moving and selecting each other on the map.
+- If backend changes are required, give exact GitHub and Render redeployment steps.
+- Preserve existing working features and do not invent test results.
+- Do not send me back to manually edit Kotlin code. Make the changes in the project files yourself.
